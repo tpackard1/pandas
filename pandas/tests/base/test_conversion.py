@@ -237,11 +237,11 @@ def test_numpy_array_all_dtypes(any_numpy_dtype):
     "arr, attr",
     [
         (pd.Categorical(["a", "b"]), "_codes"),
-        (pd.core.arrays.period_array(["2000", "2001"], freq="D"), "_data"),
+        (pd.core.arrays.period_array(["2000", "2001"], freq="D"), "_ndarray"),
         (pd.array([0, np.nan], dtype="Int64"), "_data"),
         (IntervalArray.from_breaks([0, 1]), "_left"),
         (SparseArray([0, 1]), "_sparse_values"),
-        (DatetimeArray(np.array([1, 2], dtype="datetime64[ns]")), "_data"),
+        (DatetimeArray(np.array([1, 2], dtype="datetime64[ns]")), "_ndarray"),
         # tz-aware Datetime
         (
             DatetimeArray(
@@ -250,20 +250,14 @@ def test_numpy_array_all_dtypes(any_numpy_dtype):
                 ),
                 dtype=DatetimeTZDtype(tz="US/Central"),
             ),
-            "_data",
+            "_ndarray",
         ),
     ],
 )
 def test_array(arr, attr, index_or_series, request):
     box = index_or_series
-    warn = None
-    if arr.dtype.name in ("Sparse[int64, 0]") and box is pd.Index:
-        mark = pytest.mark.xfail(reason="Index cannot yet store sparse dtype")
-        request.node.add_marker(mark)
-        warn = FutureWarning
 
-    with tm.assert_produces_warning(warn):
-        result = box(arr, copy=False).array
+    result = box(arr, copy=False).array
 
     if attr:
         arr = getattr(arr, attr)
@@ -290,10 +284,8 @@ def test_array_multiindex_raises():
         ),
         (pd.array([0, np.nan], dtype="Int64"), np.array([0, pd.NA], dtype=object)),
         (
-            IntervalArray.from_breaks([0, 1, 2], "right"),
-            np.array(
-                [pd.Interval(0, 1, "right"), pd.Interval(1, 2, "right")], dtype=object
-            ),
+            IntervalArray.from_breaks([0, 1, 2]),
+            np.array([pd.Interval(0, 1), pd.Interval(1, 2)], dtype=object),
         ),
         (SparseArray([0, 1]), np.array([0, 1], dtype=np.int64)),
         # tz-naive datetime
@@ -336,10 +328,7 @@ def test_array_multiindex_raises():
 def test_to_numpy(arr, expected, index_or_series_or_array, request):
     box = index_or_series_or_array
 
-    warn = None
-    if index_or_series_or_array is pd.Index and isinstance(arr, SparseArray):
-        warn = FutureWarning
-    with tm.assert_produces_warning(warn):
+    with tm.assert_produces_warning(None):
         thing = box(arr)
 
     if arr.dtype.name == "int64" and box is pd.array:

@@ -36,7 +36,7 @@ class Pivot:
         self.df = DataFrame(data)
 
     def time_reshape_pivot_time_series(self):
-        self.df.pivot("date", "variable", "value")
+        self.df.pivot(index="date", columns="variable", values="value")
 
 
 class SimpleReshape:
@@ -112,9 +112,7 @@ class Unstack:
             values = np.take(list(string.ascii_letters), indices)
             values = [pd.Categorical(v) for v in values.T]
 
-            self.df = DataFrame(
-                {i: cat for i, cat in enumerate(values)}, index, columns
-            )
+            self.df = DataFrame(dict(enumerate(values)), index, columns)
 
         self.df2 = self.df.iloc[:-1]
 
@@ -212,7 +210,7 @@ class PivotTable:
         )
 
     def time_pivot_table_margins_only_column(self):
-        self.df.pivot_table(columns=["key2", "key3"], margins=True)
+        self.df.pivot_table(columns=["key1", "key2", "key3"], margins=True)
 
 
 class Crosstab:
@@ -268,9 +266,7 @@ class Cut:
         self.datetime_series = pd.Series(
             np.random.randint(N, size=N), dtype="datetime64[ns]"
         )
-        self.interval_bins = pd.IntervalIndex.from_breaks(
-            np.linspace(0, N, bins), "right"
-        )
+        self.interval_bins = pd.IntervalIndex.from_breaks(np.linspace(0, N, bins))
 
     def time_cut_int(self, bins):
         pd.cut(self.int_series, bins)
