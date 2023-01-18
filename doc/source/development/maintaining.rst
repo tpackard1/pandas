@@ -454,7 +454,7 @@ Release
    `MacPython repo <https://github.com/MacPython/pandas-wheels>`_.
    Open a PR updating the build commit to the released version, and merge it once the
    CI is green. Update it by typing::
-   
+
     git checkout master
     git pull --ff-only upstream master
     git checkout -B RLS-<version>
